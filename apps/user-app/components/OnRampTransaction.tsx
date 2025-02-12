@@ -6,7 +6,7 @@ export const OnRampTransactions = ({
     transactions: {
         time: Date,
         amount: number,
-        // TODO: Can the type of `status` be more specific?
+        
         status: string,
         provider: string
     }[]
@@ -36,4 +36,9 @@ export const OnRampTransactions = ({
             </div>)}
         </div>
     </Card>
+}
+enum status{
+    Success,
+    Failure,
+    Processing
 }
