@@ -1,16 +1,21 @@
-import { NextResponse } from "next/server"
-import { PrismaClient } from "@repo/db/client";
+"use Server"
+import { getServerSession } from "next-auth";
+import { authOptions } from "../../../lib/auth";
+import { NextRequest, NextResponse } from "next/server";
 
-const client = new PrismaClient();
-
-export const GET = async () => {
-    await client.user.create({
-        data: {
-            email: "asd",
-            name: "adsads"
-        }
-    })
+export const GET = async (req: NextRequest, res: NextResponse) => {
+    const session = await getServerSession(authOptions);
+    console.log("HELFLCSKLNSKN")
+    console.log(process.env.DATABASE_URL)
+    if (session.user) {
+        
+        return NextResponse.json({
+            user: session.user
+        })
+    }
     return NextResponse.json({
-        message: "hi there"
+        message: "You are not logged in"
+    }, {
+        status: 403
     })
-}
+};

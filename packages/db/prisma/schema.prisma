@@ -6,7 +6,11 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
+enum AuthType {
+  Google
+  Github
+  Credentials
+}
 model User {
   id                Int                 @id @default(autoincrement())
   email             String?             @unique
@@ -17,6 +21,7 @@ model User {
   Balance           Balance[]
   sentTransfers     p2pTransfer[]       @relation(name: "FromUserRelation")
   receivedTransfers p2pTransfer[]       @relation(name: "ToUserRelation")
+  transaction       Transaction[]
 }
 
 model p2pTransfer {
@@ -31,9 +36,23 @@ model p2pTransfer {
 
 model Merchant {
   id        Int      @id @default(autoincrement())
-  email     String   @unique
+  email     String?   @unique
   name      String?
-  auth_type AuthType
+  auth_type AuthType @default(Credentials)
+  qrcode    String?
+  balance   MerchantBalance[]
+  transfers Transaction[] 
+  password  String
+  number    String   @unique
+}
+model Transaction {
+  id         Int          @id @default(autoincrement())
+  amount     Int
+  timestamp  DateTime
+  fromId     Int
+  from       User @relation(fields: [fromId], references: [id])
+  toId       Int
+  to         Merchant @relation(fields: [toId], references: [id])
 }
 
 model OnRampTransaction {
@@ -54,11 +73,15 @@ model Balance {
   locked Int
   user   User @relation(fields: [userId], references: [id])
 }
-
-enum AuthType {
-  Google
-  Github
+model MerchantBalance {
+  id Int @id @default(autoincrement())
+  merchantId Int @unique
+  amount Int
+  locked Int
+  merchant Merchant @relation(fields:[merchantId], references: [id])
 }
+
+
 
 enum OnRampStatus {
   Success
